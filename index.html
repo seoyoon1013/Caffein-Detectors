@@ -1,0 +1,361 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MEDI-LAB | 약 성분 해독 연구소</title>
+<style>
+:root{--navy:#17243b;--blue:#5279bd;--mint:#dff3ed;--bg:#f5f7fb;--text:#273348;--muted:#758198;--white:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,"Noto Sans KR",sans-serif;line-height:1.65}
+header{background:var(--navy);color:white;padding:30px 7% 25px}
+.logo{font-size:13px;letter-spacing:3px;color:#a9c7ed;font-weight:bold}
+header h1{font-size:32px;margin:12px 0 5px}
+header p{color:#c7d2e3;margin:0}
+nav{display:flex;gap:10px;flex-wrap:wrap;padding:13px 7%;background:white;border-bottom:1px solid #e5e9f0;position:sticky;top:0;z-index:5}
+nav button{border:0;background:#edf1f8;color:var(--navy);padding:9px 16px;border-radius:20px;font-weight:bold;cursor:pointer}
+nav button.active{background:var(--navy);color:white}
+main{max-width:1050px;margin:30px auto;padding:0 18px}
+section{display:none}
+section.active{display:block}
+h2{font-size:23px;color:var(--navy);margin:0 0 8px}
+.intro{color:var(--muted);margin:0 0 22px}
+.searchbox{display:flex;gap:8px;margin:18px 0}
+input{width:100%;padding:14px;border:1px solid #dce2ed;border-radius:12px;font-size:16px;min-width:0}
+button{cursor:pointer}
+.searchbox button,.primary{border:0;background:var(--blue);color:white;border-radius:12px;padding:12px 20px;font-weight:bold;white-space:nowrap}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 20px}
+.chip{border:1px solid #dce2ed;background:white;padding:7px 12px;border-radius:18px;color:#52627a}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.card{background:white;border:1px solid #e5eaf2;border-radius:16px;padding:18px;box-shadow:0 3px 12px #17243b08}
+.card h3{margin:0 0 5px;color:var(--navy)}
+.tag{display:inline-block;background:var(--mint);color:#26715e;padding:3px 9px;border-radius:12px;font-size:12px;margin-bottom:8px}
+.card p{color:var(--muted);font-size:14px}
+.card button{border:0;background:#edf2fa;color:var(--navy);padding:9px 13px;border-radius:9px;font-weight:bold}
+#detail{margin-top:20px}
+.detail-title{font-size:25px;color:var(--navy)}
+.detail-block{background:white;border:1px solid #e5eaf2;border-radius:14px;padding:18px;margin:12px 0}
+.detail-block h3{margin:0 0 8px;color:var(--blue)}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.step{background:#edf3fb;border-radius:12px;padding:13px;text-align:center;font-size:14px}
+.note{background:#fff6df;border-left:4px solid #e6b64f;padding:13px;border-radius:8px;font-size:14px}
+.quiz-option{display:block;width:100%;text-align:left;background:white;border:1px solid #dce2ed;padding:13px;border-radius:10px;margin:9px 0;color:var(--text)}
+.quiz-option:hover{border-color:var(--blue)}
+#feedback{margin-top:15px;padding:15px;border-radius:10px;background:#edf3fb;display:none}
+footer{text-align:center;padding:30px;color:var(--muted);font-size:12px}
+a{color:var(--blue)}
+@media(max-width:550px){header h1{font-size:26px}.searchbox{flex-direction:column}.searchbox button{padding:13px}}
+</style>
+</head>
+<body>
+<header>
+<div class="logo">MEDICAL KNOWLEDGE LAB</div>
+<h1>MEDI-LAB</h1>
+<p>약의 성분을 이해하고, 몸속 작용 원리를 탐구하다.</p>
+</header>
+
+<nav>
+<button class="active" onclick="showTab('search',this)">성분 탐색</button>
+<button onclick="showTab('concept',this)">개념 학습실</button>
+<button onclick="showTab('quiz',this)">사고력 퀴즈</button>
+</nav>
+
+<main>
+<section id="search" class="active">
+<h2>성분 탐색실</h2>
+<p class="intro">약 이름, 유효성분, 증상, 작용 방식 등을 검색해 보세요.</p>
+<div class="searchbox">
+<input id="query" placeholder="예: 두통, 타이레놀, 속쓰림, 아세트아미노펜" onkeydown="if(event.key==='Enter')search()">
+<button onclick="search()">검색</button>
+</div>
+<div class="chips">
+<button class="chip" onclick="quick('두통')">두통</button>
+<button class="chip" onclick="quick('감기')">감기</button>
+<button class="chip" onclick="quick('알레르기')">알레르기</button>
+<button class="chip" onclick="quick('속쓰림')">속쓰림</button>
+<button class="chip" onclick="quick('기침')">기침</button>
+<button class="chip" onclick="quick('설사')">설사</button>
+<button class="chip" onclick="quick('멀미')">멀미</button>
+<button class="chip" onclick="quick('생리통')">생리통</button>
+</div>
+<div id="results" class="grid"></div>
+<div id="detail"></div>
+</section>
+
+<section id="concept">
+<h2>개념 학습실</h2>
+<p class="intro">약의 작용을 이해하는 데 필요한 생명과학·화학 개념을 공부해 봅시다.</p>
+<div class="grid">
+<div class="card"><span class="tag">생명과학</span><h3>효소와 효소 억제</h3><p>효소는 생체 내 화학 반응을 촉진하는 생체 촉매입니다. 특정 물질이 효소의 작용을 방해하면 효소의 반응 속도가 달라질 수 있습니다.</p></div>
+<div class="card"><span class="tag">생명과학</span><h3>수용체와 신호 전달</h3><p>수용체는 특정 신호 분자를 인식하는 단백질입니다. 약물이 수용체에 결합하면 세포에 전달되는 신호가 달라질 수 있습니다.</p></div>
+<div class="card"><span class="tag">화학</span><h3>산과 염기의 중화</h3><p>산과 염기가 반응하여 물과 염 등을 생성하는 반응입니다. 탄산칼슘은 위산의 염산과 반응할 수 있습니다.</p></div>
+<div class="card"><span class="tag">화학</span><h3>분자 구조와 성질</h3><p>분자의 구조와 작용기는 물질의 용해도, 반응성, 다른 분자와의 상호작용에 영향을 줍니다.</p></div>
+<div class="card"><span class="tag">생명과학</span><h3>염증과 프로스타글란딘</h3><p>프로스타글란딘은 통증, 발열, 염증 반응 등에 관여하는 지질 매개 물질입니다.</p></div>
+<div class="card"><span class="tag">생명과학</span><h3>항원·항체와 알레르기</h3><p>알레르기 반응에서는 면역계가 특정 물질에 과민하게 반응합니다. 히스타민은 알레르기 증상에 관여하는 물질입니다.</p></div>
+</div>
+</section>
+
+<section id="quiz">
+<h2>사고력 퀴즈</h2>
+<p class="intro">배운 개념을 실제 약물의 작용 원리에 적용해 보세요.</p>
+<div class="detail-block">
+<span class="tag">문제 1 · 효소</span>
+<h3>아스피린이 COX 효소를 억제하면 프로스타글란딘 생성은 어떻게 될까요?</h3>
+<button class="quiz-option" onclick="answer(0)">① 증가한다.</button>
+<button class="quiz-option" onclick="answer(1)">② 감소한다.</button>
+<button class="quiz-option" onclick="answer(2)">③ 아무런 변화가 없다.</button>
+<div id="feedback"></div>
+</div>
+<div class="detail-block">
+<span class="tag">문제 2 · 산과 염기</span>
+<h3>탄산칼슘이 위산의 염산과 반응할 때 일어나는 반응은?</h3>
+<button class="quiz-option" onclick="answer2(0)">① 산화·환원 반응</button>
+<button class="quiz-option" onclick="answer2(1)">② 산·염기 중화 반응</button>
+<button class="quiz-option" onclick="answer2(2)">③ 광합성</button>
+<div id="feedback2" style="display:none;background:#edf3fb;padding:15px;border-radius:10px;margin-top:12px"></div>
+</div>
+</section>
+</main>
+
+<footer>
+MEDI-LAB · 청소년을 위한 의약학 기초 학습 프로젝트<br>
+본 사이트는 교육 목적의 정보 제공 사이트이며 진단·처방·복용 지침을 제공하지 않습니다.<br>
+의약품의 정확한 허가사항은 <a href="https://nedrug.mfds.go.kr/" target="_blank">식품의약품안전처 의약품안전나라</a>에서 확인하세요.
+</footer>
+
+<script>
+const drugs=[
+{
+name:"아세트아미노펜",brand:"타이레놀",category:"해열·진통",
+aliases:["타이레놀","두통","머리아픔","발열","열","치통","몸살","해열제","진통제","아세트아미노펜"],
+effect:"해열 및 진통 작용",
+mechanism:"중추신경계에서 통증과 체온 조절에 관여하는 경로에 영향을 주는 것으로 알려져 있습니다. 정확한 작용 기전은 완전히 밝혀지지 않았습니다.",
+concept:"생체 내 신호 전달, 통증 및 체온 조절",
+steps:["아세트아미노펜 흡수","중추신경계에 작용","통증·체온 조절 경로에 영향","해열 및 진통 효과"],
+caution:"과량 복용은 간에 심각한 손상을 일으킬 수 있습니다. 여러 복합 감기약에 같은 성분이 들어 있을 수 있으므로 중복 성분에 주의해야 합니다."
+},
+{
+name:"아스피린",brand:"아세틸살리실산",category:"해열·진통",
+aliases:["아스피린","아세틸살리실산","두통","통증","발열","진통제"],
+effect:"진통·해열·항염 작용 및 혈소판 응집 억제",
+mechanism:"COX 효소를 비가역적으로 억제하여 프로스타글란딘과 트롬복산 생성에 영향을 줍니다.",
+concept:"효소 억제, 프로스타글란딘, 혈소판",
+steps:["아스피린이 체내에 흡수","COX 효소 억제","프로스타글란딘 등의 생성 감소","통증·염증 관련 반응 변화"],
+caution:"위장관 출혈 등의 위험이 있으며, 소아·청소년은 바이러스 감염 시 라이 증후군 위험과 관련해 특히 주의가 필요합니다. 임의로 사용하지 마세요."
+},
+{
+name:"이부프로펜",brand:"애드빌 등",category:"해열·진통",
+aliases:["이부프로펜","두통","생리통","치통","발열","염증","관절통","진통제"],
+effect:"해열·진통·항염 작용",
+mechanism:"COX 효소의 작용을 억제하여 프로스타글란딘 생성을 감소시킵니다.",
+concept:"효소 활성 부위, 프로스타글란딘 합성",
+steps:["이부프로펜 흡수","COX 효소 억제","프로스타글란딘 생성 감소","통증·염증·발열 반응 완화"],
+caution:"위장 장애, 신장 기능 및 천식 관련 주의사항이 있습니다. 탈수 상태 등에서는 위험이 커질 수 있습니다."
+},
+{
+name:"나프록센",brand:"나프록센 제제",category:"해열·진통",
+aliases:["나프록센","생리통","관절통","염증","두통","진통제"],
+effect:"비스테로이드성 소염진통 작용",
+mechanism:"COX 효소를 억제하여 프로스타글란딘 생성을 감소시킵니다.",
+concept:"효소 억제와 염증 매개 물질",
+steps:["성분 흡수","COX 효소 억제","프로스타글란딘 감소","염증·통증 반응 변화"],
+caution:"위장관 출혈, 신장 관련 부작용 등에 주의해야 합니다. 다른 소염진통제와 임의로 함께 사용하지 마세요."
+},
+{
+name:"세티리진",brand:"세티리진 제제",category:"항히스타민",
+aliases:["세티리진","알레르기","재채기","콧물","가려움","두드러기","항히스타민","비염"],
+effect:"알레르기 증상 완화",
+mechanism:"히스타민 H1 수용체를 차단하여 히스타민에 의한 반응을 줄입니다.",
+concept:"수용체, 리간드, 신호 전달",
+steps:["알레르기 반응에서 히스타민 분비","H1 수용체에 작용","세티리진이 수용체 작용을 차단","알레르기 증상 관련 반응 감소"],
+caution:"졸음이 발생할 수 있습니다. 개인별 반응과 다른 약물과의 상호작용에 주의해야 합니다."
+},
+{
+name:"로라타딘",brand:"로라타딘 제제",category:"항히스타민",
+aliases:["로라타딘","알레르기","재채기","콧물","가려움","두드러기","비염"],
+effect:"알레르기 증상 완화",
+mechanism:"말초 H1 수용체에 대한 히스타민의 작용을 억제합니다.",
+concept:"수용체와 신호 전달",
+steps:["히스타민 분비","H1 수용체에 결합하려는 작용","로라타딘의 수용체 차단","알레르기 증상 관련 반응 감소"],
+caution:"개인별 부작용과 간 기능 등에 따른 주의사항이 있으므로 제품 허가사항을 확인해야 합니다."
+},
+{
+name:"덱스트로메토르판",brand:"기침 억제 성분",category:"기침",
+aliases:["덱스트로메토르판","기침","마른기침","잔기침","기침약"],
+effect:"기침 반사 억제",
+mechanism:"중추신경계의 기침 반사 경로에 작용합니다.",
+concept:"중추신경계와 신경 신호",
+steps:["기침 자극 발생","중추의 기침 반사 경로에 작용","기침 반사 신호 조절","기침 빈도 감소"],
+caution:"다른 기침약이나 특정 항우울제 등과 상호작용할 수 있습니다. 연령별 사용 제한도 확인해야 합니다."
+},
+{
+name:"구아이페네신",brand:"거담 성분",category:"기침",
+aliases:["구아이페네신","가래","기침","거담제","가래약"],
+effect:"가래 배출을 돕는 거담 작용",
+mechanism:"기도 분비물의 수분 함량과 배출을 돕는 방향으로 작용합니다.",
+concept:"점액, 분비물, 점도",
+steps:["기도에 점액 축적","분비물의 배출을 돕는 작용","점액 배출 촉진","가래 배출에 도움"],
+caution:"기침의 원인에 따라 적절한 관리가 달라집니다. 지속되거나 심한 기침은 진료가 필요합니다."
+},
+{
+name:"슈도에페드린",brand:"코막힘 완화 성분",category:"코막힘",
+aliases:["슈도에페드린","코막힘","코감기","비충혈","비염"],
+effect:"코 점막 혈관 수축을 통한 코막힘 완화",
+mechanism:"교감신경계에 작용하여 혈관 수축을 유도합니다.",
+concept:"교감신경, 수용체, 혈관",
+steps:["코 점막 혈관 확장","교감신경계 자극","혈관 수축","점막 부종 감소"],
+caution:"심박수·혈압 등에 영향을 줄 수 있습니다. 연령, 기저질환, 병용 약물에 따른 제한이 있습니다."
+},
+{
+name:"파모티딘",brand:"위산 분비 억제 성분",category:"위장",
+aliases:["파모티딘","속쓰림","위산","위염","위산과다","위장약"],
+effect:"위산 분비 감소",
+mechanism:"위 벽세포의 히스타민 H2 수용체를 차단하여 위산 분비를 줄입니다.",
+concept:"수용체, 세포 신호 전달",
+steps:["히스타민 신호 전달","H2 수용체 활성화","파모티딘이 수용체 차단","위산 분비 감소"],
+caution:"증상이 지속되거나 심해지는 경우 원인 확인이 필요합니다. 제품별 허가사항을 확인해야 합니다."
+},
+{
+name:"오메프라졸",brand:"프로톤 펌프 억제제",category:"위장",
+aliases:["오메프라졸","속쓰림","위산 역류","역류성 식도염","위산","위장약"],
+effect:"위산 분비 억제",
+mechanism:"위 벽세포의 H+/K+-ATPase(프로톤 펌프)를 억제합니다.",
+concept:"ATP, 막단백질, 이온 수송",
+steps:["위 벽세포의 프로톤 펌프","오메프라졸의 활성화","프로톤 펌프 억제","위산 분비 감소"],
+caution:"복용 기간과 적응증에 따라 주의사항이 다릅니다. 장기간 사용 여부는 전문가와 상의해야 합니다."
+},
+{
+name:"탄산칼슘",brand:"제산제 성분",category:"위장",
+aliases:["탄산칼슘","속쓰림","위산과다","제산제","산성","위장약"],
+effect:"위산 중화",
+mechanism:"탄산칼슘이 위산의 염산과 반응하여 염화칼슘, 물, 이산화탄소를 생성합니다.",
+concept:"산·염기 중화 반응",
+steps:["위산의 염산 존재","탄산칼슘 투입","산·염기 반응","산성도 감소"],
+equation:"CaCO₃ + 2HCl → CaCl₂ + H₂O + CO₂",
+caution:"칼슘 섭취량, 신장 기능, 다른 약물의 흡수에 영향을 줄 수 있습니다."
+},
+{
+name:"시메티콘",brand:"가스 제거 성분",category:"위장",
+aliases:["시메티콘","복부팽만","가스","배에 가스","복부 가스"],
+effect:"위장관 가스 관련 불편 완화",
+mechanism:"작은 기포들이 합쳐지도록 도와 가스 배출을 쉽게 하는 물리적 작용을 합니다.",
+concept:"표면장력, 기포, 물리적 성질",
+steps:["위장관 내 작은 기포 형성","기포 표면에 작용","작은 기포들이 합쳐짐","가스 배출에 도움"],
+caution:"복통이나 복부팽만이 지속된다면 다른 원인이 있는지 확인해야 합니다."
+},
+{
+name:"로페라마이드",brand:"지사제 성분",category:"위장",
+aliases:["로페라마이드","설사","묽은 변","지사제"],
+effect:"장 운동을 감소시키는 지사 작용",
+mechanism:"장관의 오피오이드 수용체에 작용하여 장 운동과 장 내용물 이동을 늦춥니다.",
+concept:"수용체와 신경 조절",
+steps:["장 운동 발생","장관 수용체에 작용","장 운동 감소","장 내용물 이동 속도 변화"],
+caution:"혈변, 고열, 심한 복통이 동반되는 설사 등에는 부적절할 수 있습니다. 소아·청소년은 임의로 사용하지 마세요."
+},
+{
+name:"디멘히드리네이트",brand:"멀미약 성분",category:"멀미",
+aliases:["디멘히드리네이트","멀미","메스꺼움","구역","어지럼"],
+effect:"멀미로 인한 메스꺼움 완화",
+mechanism:"히스타민 H1 수용체 등에 작용하여 구토와 멀미 관련 신호를 조절합니다.",
+concept:"수용체와 신경 신호",
+steps:["평형 감각 관련 신호 발생","신경계의 신호 전달","수용체 작용 조절","멀미 증상 관련 반응 감소"],
+caution:"졸음과 집중력 저하가 발생할 수 있습니다. 청소년 사용 가능 여부와 연령 제한을 확인해야 합니다."
+},
+{
+name:"비스무트 화합물",brand:"위장약 성분군",category:"위장",
+aliases:["비스무트","비스무트 화합물","설사","위장 불편","위장약"],
+effect:"제품에 따라 위장관 점막 보호 및 설사 관련 증상 완화",
+mechanism:"비스무트 화합물은 위장관 점막에 보호 작용을 나타낼 수 있습니다.",
+concept:"물질의 표면 작용, 점막 보호",
+steps:["위장관 점막","비스무트 화합물의 작용","점막 보호 효과","위장관 불편 완화에 도움"],
+caution:"제품마다 성분과 허가사항이 다릅니다. 살리실산염을 포함하는 제품은 청소년에게 특별한 주의가 필요합니다."
+},
+{
+name:"경구수분보충액",brand:"ORS",category:"수분 보충",
+aliases:["경구수분보충액","ORS","탈수","설사","구토","수분 보충"],
+effect:"수분과 전해질 보충",
+mechanism:"포도당과 나트륨의 공동수송을 이용하여 장에서 수분 흡수를 돕습니다.",
+concept:"세포막 수송, 농도 기울기, 공동수송",
+steps:["장 내 포도당과 나트륨","공동수송체를 통한 흡수","전해질 이동","수분 흡수에 도움"],
+caution:"심한 탈수, 의식 변화, 소변량 감소 등은 의료 평가가 필요합니다. 스포츠음료와 ORS는 조성이 다릅니다."
+},
+{
+name:"멜라토닌",brand:"생체 리듬 관련 물질",category:"생체리듬",
+aliases:["멜라토닌","수면","생체리듬","일주기 리듬","잠"],
+effect:"일주기 생체 리듬 조절에 관여",
+mechanism:"뇌의 멜라토닌 수용체를 통해 수면-각성 주기와 일주기 리듬에 관여합니다.",
+concept:"호르몬, 수용체, 생체 시계",
+steps:["어두운 환경","멜라토닌 분비 변화","수용체를 통한 신호","일주기 리듬 조절"],
+caution:"청소년의 수면 문제에 임의로 보충제를 사용하는 것은 권장하지 않습니다. 수면 문제는 원인 평가가 우선입니다."
+}
+];
+
+function showTab(id,btn){
+ document.querySelectorAll("main section").forEach(s=>s.classList.remove("active"));
+ document.getElementById(id).classList.add("active");
+ document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+ btn.classList.add("active");
+}
+function quick(word){document.getElementById("query").value=word;search()}
+function search(){
+ const q=document.getElementById("query").value.trim().toLowerCase();
+ const results=document.getElementById("results");
+ document.getElementById("detail").innerHTML="";
+ if(!q){results.innerHTML="<p>검색어를 입력해 주세요.</p>";return}
+ const found=drugs.filter(d=>
+ [d.name,d.brand,d.category,d.effect,d.mechanism,...d.aliases].join(" ").toLowerCase().includes(q)
+ );
+ if(!found.length){
+ results.innerHTML="<p>검색 결과가 없습니다. 다른 표현으로 검색하거나 아래 공식 데이터베이스를 이용해 보세요.<br><a href='https://nedrug.mfds.go.kr/searchDrug' target='_blank'>식약처 의약품안전나라 의약품 검색</a></p>";
+ return;
+ }
+ results.innerHTML=found.map(d=>`
+ <article class="card">
+ <span class="tag">${d.category}</span>
+ <h3>${d.name}</h3>
+ <p>${d.brand}</p>
+ <p>${d.effect}</p>
+ <button onclick="detail('${d.name}')">작용 원리 탐구 →</button>
+ </article>`).join("");
+}
+function detail(name){
+ const d=drugs.find(x=>x.name===name);
+ const el=document.getElementById("detail");
+ el.innerHTML=`
+ <div class="detail-block">
+ <span class="tag">${d.category}</span>
+ <div class="detail-title">${d.name}</div>
+ <p>관련 제품·표현: ${d.brand}</p>
+ <h3>① 주요 작용</h3><p>${d.effect}</p>
+ </div>
+ <div class="detail-block">
+ <h3>② 작용 원리</h3><p>${d.mechanism}</p>
+ <div class="steps">${d.steps.map((s,i)=>`<div class="step"><b>STEP ${i+1}</b><br>${s}</div>`).join("")}</div>
+ ${d.equation?`<p><b>화학 반응식</b><br>${d.equation}</p>`:""}
+ </div>
+ <div class="detail-block">
+ <h3>③ 연결되는 교과 개념</h3><p>${d.concept}</p>
+ </div>
+ <div class="detail-block">
+ <h3>④ 알아둘 주의사항</h3><div class="note">${d.caution}</div>
+ </div>
+ <p style="font-size:13px;color:#758198">※ 교육용 요약입니다. 실제 제품의 성분·함량·연령별 허가사항은 제품 설명서와 식약처 자료를 확인하세요.</p>`;
+ el.scrollIntoView({behavior:"smooth",block:"start"});
+}
+function answer(n){
+ const f=document.getElementById("feedback");f.style.display="block";
+ f.innerHTML=n===1?
+ "<b>정답입니다.</b><br>COX 효소는 프로스타글란딘 생성에 관여합니다. 아스피린이 COX를 억제하면 프로스타글란딘 생성이 감소합니다.":
+ "<b>다시 생각해 보세요.</b><br>COX는 프로스타글란딘 생성 과정에 관여하는 효소입니다. 효소의 활성이 억제되면 생성물의 양은 일반적으로 감소합니다.";
+}
+function answer2(n){
+ const f=document.getElementById("feedback2");f.style.display="block";
+ f.innerHTML=n===1?
+ "<b>정답입니다!</b><br>탄산칼슘은 염산과 반응합니다. CaCO₃ + 2HCl → CaCl₂ + H₂O + CO₂":
+ "<b>다시 생각해 보세요.</b><br>탄산칼슘은 염기성 성질을 나타내며 염산과 반응하므로 산·염기 중화 반응입니다.";
+}
+search();
+</script>
+</body>
+</html>
